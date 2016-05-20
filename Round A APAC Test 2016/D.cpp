@@ -46,37 +46,92 @@ void errDebug(T a, Args... args) {
     errDebug(args...);
 }
 
-vector<LL> pos;
-LL k;
-int rec(LL kk)
+
+int m,n,s;
+pair<int, char> ops[100100];
+int dirx[4] = {0,1,0,-1};
+int diry[4] = {1,0,-1,0};
+deque<pair<int,int> > deq;
+set<pair<int,int> > snake;
+set<pair<int,int> > food;
+int x,y,dir,p;
+bool stop;
+void proc()
 {
-	int start = 0;
-	while(start < pos.size() && pos[start] <= kk)
-		start++;
-	start--;
-	if(pos[start] == kk)
-		return 0;
-	LL mid = pos[start];
-	LL target = mid * 2 - kk;
-	return rec(target) ^ 1;
+	if(dir < 0 || dir >= 4)
+	{
+		dir += 4;
+		dir %= 4;
+	}
+	int nx = deq.front().first + dirx[dir];
+	int ny = deq.front().second + diry[dir];
+	if(nx < 0 || nx >= m)
+	{
+		nx += m;
+		nx %= m;
+	}
+	if(ny < 0 || ny >= n)
+	{
+		ny += n;
+		ny %= n;
+	}
+	if(deq.back() != MP(nx,ny) && snake.count(MP(nx,ny)))
+	{
+		stop = true;
+		return;
+	}
+	if((nx + ny) % 2 != 0)
+	{
+		if(food.count(MP(nx,ny)) == 0)
+		{
+			snake.insert(MP(nx,ny));
+			deq.push_front(MP(nx,ny));
+			food.insert(MP(nx,ny));
+			return;
+		}
+	}
+	int tailx = deq.back().first;
+	int taily = deq.back().second;
+	snake.insert(MP(nx,ny));
+	deq.push_front(MP(nx,ny));
+	snake.erase(MP(tailx,taily));
+	deq.pop_back();
 }
-int solve()
+LL solve()
 {
-	return rec(k);
+	p = x = y = dir = 0;
+	stop = false;
+	snake.clear();
+	food.clear();
+	deq.clear();
+	deq.push_back(MP(0,0));
+	snake.insert(MP(0,0));
+	FOR(i,1,ops[s - 1].first + 2 * m + 2 * n + 10)
+	{
+		proc();
+		if(stop)
+			break;
+		if(p < s && ops[p].first == i)
+		{
+			char op = ops[p].second;
+			if(op == 'L')
+				dir--;
+			else
+				dir++;
+			p++;
+		}
+	}
+	return deq.size();
 }
 int main()
 {
-	LL start = 1;
-	while(start <= 1e18)
-	{
-		pos.PB(start);
-		start *= 2;
-	}
 	int T;
 	cin >> T;
 	FOR(z, 0, T)
 	{
-		cin >> k;
+		cin >> s >> m >> n;
+		FOR(i,0,s)
+		cin >> ops[i].first >> ops[i].second;
 		cout << "Case #" << z + 1 << ": ";
 		cout << solve() << endl;
 	}

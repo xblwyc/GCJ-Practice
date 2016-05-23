@@ -46,50 +46,82 @@ void errDebug(T a, Args... args) {
     errDebug(args...);
 }
 
-int n,k;
-int a[110];
-int vis[110];
-int solve()
+string a[100100];
+int cnt;
+void solve()
 {
-	ZERO(vis);
-	FOR(j,0,n)
+	string tmp;
+	vector<string> out;
+	stack<pair<int,int> > sta;
+	pair<int,int> last = MP(-100,-100);
+	FOR(i,0,cnt)
 	{
-		queue<pair<int,int> > q;
-		FOR(i,0,n)
+		if(a[i].size() == 0)
 		{
-			if(vis[i])
-				continue;
-			if(q.size() == 2 && q.front().first == q.back().first && q.front().first == a[i])
+			if(sta.size() == 0)
 			{
-				vis[q.front().second] = vis[q.back().second] = vis[i] = 1;
-				break;
+				out.PB(tmp);
+				tmp.clear();
 			}
-			else
+			continue;
+		}
+		FORE(j,0,a[i].size())
+		{
+			debug(i,j,tmp)
+			if(j == 0)
 			{
-				q.push(MP(a[i], i));
-				if(q.size() > 2)
-					q.pop();
+				if(sta.size() == 0)
+					tmp.PB(a[i][j]);
+			}
+			else if(j == a[i].size())
+			{
+				if(sta.size() == 0)
+				{
+					out.PB(tmp);
+					tmp.clear();
+				}
+			}
+			else{
+				if(a[i][j - 1] == '*' && a[i][j] == '/')
+				{
+					if(sta.size() && !(sta.top().first == i && sta.top().second == j - 1))
+					{
+						sta.pop();
+						last = MP(i,j);
+					}
+					else if(sta.size() == 0)
+						tmp.PB(a[i][j]);
+
+				}
+				else if(a[i][j - 1] == '/' && a[i][j] == '*')
+				{
+					if(!(last.first == i && last.second == j - 1))
+					{
+						if(sta.size() == 0)
+							tmp.pop_back();
+						sta.push(MP(i,j));
+					}
+					else if(sta.size() == 0)
+						tmp.PB(a[i][j]);
+				}
+				else if(sta.size() == 0)
+					tmp.PB(a[i][j]);
 			}
 		}
 	}
-	int res = 0;
-	FOR(i,0,n)
-	if(!vis[i])
-	{
-		res++;
-	}
-	return res;
+	if(tmp.size())
+	out.PB(tmp);
+	FOR(i,0,out.size())
+	cout << out[i] << endl;
 }
 int main()
 {
-	int T;
-	cin >> T;
-	FOR(z, 0, T)
+	string s;
+	cnt = 0;
+	while(getline(cin, s))
 	{
-		cin >> n >> k;
-		FOR(i,0,n)
-		cin >> a[i];
-		cout << "Case #" << z + 1 << ": ";
-		cout << solve() << endl;
+		a[cnt++] = s;
 	}
+	cout << "Case #1:" << endl;
+	solve(); 
 }
